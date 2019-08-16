@@ -6,14 +6,12 @@
 #include <functional>
 #include <stdio.h>
 
-using namespace std::placeholders;
-
-class Pool;
+class ConnPool;
 
 // 连接器基类
 class ConnBase{
 public:
-    ConnBase(std::shared_ptr<Pool> p){
+    ConnBase(std::shared_ptr<ConnPool> p){
         pool = p;
     }
 
@@ -24,18 +22,18 @@ public:
         printf("base conn exec\n");
     }
 
-    std::shared_ptr<Pool> getPool(){
+    std::shared_ptr<ConnPool> getPool(){
         return pool.lock();
     }
 
 protected:
-    std::weak_ptr<Pool> pool;
+    std::weak_ptr<ConnPool> pool;
 };
 
 // 创建工厂
 class ConnFactory{
 public:
-    virtual ConnBase *create(std::shared_ptr<Pool> pool){
+    virtual ConnBase *create(std::shared_ptr<ConnPool> pool){
         return new ConnBase(pool);
     }
 };
@@ -43,14 +41,14 @@ public:
 // 自定义删除器
 void delter(ConnBase *conn);
 
-class Pool: public std::enable_shared_from_this<Pool>{
+class ConnPool: public std::enable_shared_from_this<ConnPool>{
     typedef std::shared_ptr<ConnBase> ConnPtr;
 public:
-    Pool(){
+    ConnPool(){
 
     }
 
-    ~Pool(){
+    ~ConnPool(){
         while (!connList.empty()){
             auto ptr = connList.front();
             connList.pop_front();
@@ -61,19 +59,22 @@ public:
 
     // 通过初始化不同的 创建工厂实现多态
     void init(ConnFactory *factory){
+        mfactory = factory;
         for(int i=0;i<20;i++){
             connList.emplace_back(factory->create(shared_from_this()));
         }
     }
 
     ConnPtr grab(){
+        ConnBase *conn;
         if(!connList.empty()){
-            auto conn = connList.front();
+            conn = connList.front();
             connList.pop_front();
-            std::shared_ptr<ConnBase> ptr(conn,delter);
-            return ptr;
+        }else{
+            conn = mfactory->create(nullptr);
         }
-        return nullptr;
+        std::shared_ptr<ConnBase> ptr(conn,delter);
+        return ptr;
     }
     
     // 回收
@@ -82,7 +83,10 @@ public:
     }
 
 private:
+    ConnFactory *mfactory;
     std::list<ConnBase *> connList;
+    float incrRate;         // 动态变更因子
+    float decrRate;
 };
 
 #endif //CONN_POOL_H

@@ -5,7 +5,7 @@
 
 class myconn: public ConnBase{
 public:
-    myconn(std::shared_ptr<Pool> pool)
+    myconn(std::shared_ptr<ConnPool> pool)
         :ConnBase(pool){
     }
 
@@ -19,7 +19,7 @@ public:
 
 class myFactory: public ConnFactory{
 public:
-    virtual myconn *create(std::shared_ptr<Pool> pool) override{
+    virtual myconn *create(std::shared_ptr<ConnPool> pool) override{
         return new myconn(pool);
     }
 };
