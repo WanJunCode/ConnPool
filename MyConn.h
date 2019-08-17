@@ -10,6 +10,7 @@ public:
     }
 
     ~myconn(){
+        printf("my conn dtor\n");
     }
 
     virtual void exec() override{
