@@ -18,7 +18,8 @@ main (int argc, char *argv[])
       "mongodb://localhost:27017/?appname=executing-example");
    collection = mongoc_client_get_collection (client, "mydb", "mycoll");
 
-   command = BCON_NEW ("collStats", BCON_UTF8 ("mycoll"));
+   // 创建一个新的文档
+   command = BCON_NEW("collStats", BCON_UTF8 ("mycoll"));
    if (mongoc_collection_command_simple (
           collection, command, NULL, &reply, &error)) {
       str = bson_as_canonical_extended_json (&reply, NULL);

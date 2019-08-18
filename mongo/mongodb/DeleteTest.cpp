@@ -8,17 +8,19 @@ main (int argc, char *argv[])
    mongoc_client_t *client;
    mongoc_collection_t *collection;
    bson_error_t error;
-   bson_oid_t oid;
+   bson_oid_t oid;      // mongodb 中的主键 _id
    bson_t *doc;
 
-   mongoc_init ();
+   mongoc_init();
 
    client =
       mongoc_client_new ("mongodb://localhost:27017/?appname=delete-example");
-   collection = mongoc_client_get_collection (client, "test", "test");
+   // 从 mongodb 客户端的 test 数据库获得 test 集合
+   collection = mongoc_client_get_collection(client, "test", "test");
 
+   // 创建一个文档
    doc = bson_new ();
-   bson_oid_init (&oid, NULL);
+   bson_oid_init (&oid, NULL);         // 初始化一个主键_id
    BSON_APPEND_OID (doc, "_id", &oid);
    BSON_APPEND_UTF8 (doc, "hello", "world");
 
@@ -28,8 +30,9 @@ main (int argc, char *argv[])
 
    bson_destroy (doc);
 
+   // 重新创建一个文档
    doc = bson_new ();
-   BSON_APPEND_OID (doc, "_id", &oid);
+   BSON_APPEND_OID (doc, "_id", &oid);    // 使用相同的主键_id
 
    if (!mongoc_collection_delete_one (
           collection, doc, NULL, NULL, &error)) {

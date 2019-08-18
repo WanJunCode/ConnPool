@@ -19,7 +19,7 @@ main (int argc, char *argv[])
    doc = bson_new_from_json (
       (const uint8_t *) "{\"hello\" : \"world\"}", -1, &error);
 
-    
+    // 查询 hello:world 的文档
    count = mongoc_collection_count (
       collection, MONGOC_QUERY_NONE, doc, 0, 0, NULL, &error);
 
