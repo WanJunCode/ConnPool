@@ -1,2 +1,2 @@
 # ConnPool
-this is a onnection pool for mysql 、redis、mongo
+this is a connection pool for mysql 、redis、mongo
